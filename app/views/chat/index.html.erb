@@ -1,0 +1,41 @@
+<h1>ChatGPT Test</h1>
+
+<%= form_with url: chat_path, method: :post, local: false, id: "chat-form" do |f| %>
+  <div style="margin-bottom: 15px;">
+    <%= f.label :message, "Your message:" %><br>
+    <%= f.text_area :message, rows: 4, cols: 50, placeholder: "Describe the HTML you want to generate..." %>
+  </div>
+  <%= f.submit "Generate", id: "submit-btn", style: "padding: 10px 20px; cursor: pointer;" %>
+<% end %>
+
+<div id="response-area" style="margin-top: 20px; <%= @latest_chat ? '' : 'display: none;' %>">
+  <div id="follow-up" style="background: #e8f5e9; padding: 15px; margin-bottom: 15px; border-radius: 5px;">
+    <% if @latest_chat&.follow_up_messages.present? %>
+      <% @latest_chat.follow_up_messages.each do |msg| %>
+        <p><%= msg %></p>
+      <% end %>
+    <% end %>
+  </div>
+  <h3>Preview:</h3>
+  <iframe id="preview-frame" srcdoc="<%= @latest_chat&.html_response %>" style="width: 100%; height: 400px; border: 1px solid #ccc; border-radius: 5px; background: white;"></iframe>
+</div>
+
+<script>
+  document.getElementById("chat-form").addEventListener("ajax:success", function(event) {
+    const [data] = event.detail;
+    const chat = data.chat;
+
+    const followUpDiv = document.getElementById("follow-up");
+    const messages = chat.follow_up_messages || [];
+    followUpDiv.innerHTML = messages.map(msg => `<p>${msg}</p>`).join("");
+
+    const iframe = document.getElementById("preview-frame");
+    iframe.srcdoc = chat.html_response;
+
+    document.getElementById("response-area").style.display = "block";
+  });
+
+  document.getElementById("chat-form").addEventListener("ajax:error", function() {
+    alert("Request failed. Please try again.");
+  });
+</script>
