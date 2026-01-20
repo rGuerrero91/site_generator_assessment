@@ -1,24 +1,9 @@
-# README
+Make sure you have Ruby on Rails installed: https://guides.rubyonrails.org/install_ruby_on_rails.html
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+add your openai key to the an env file (check example.env)
 
-Things you may want to cover:
+Run `bundle Install` to install dependencies
+Run `rails db:migrate` to add tables to local db
+Run `rails s` to start up the server at localhost:3000
 
-* Ruby version
-
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+Navigate to http://localhost:3000/chat
