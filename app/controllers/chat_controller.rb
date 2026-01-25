@@ -7,7 +7,7 @@ class ChatController < ApplicationController
     client = OpenAI::Client.new(access_token: ENV["OPENAI_API_KEY"])
 
     system_prompt = <<~PROMPT
-      You are an assistant developer. Your only job is to parse a user's message and provide html that matches the intent as closely as possible.
+      You are an assistant developer. Your only job is to parse a user's message and provide browser-ready HTML/CSS/Script that matches the intent as closely as possible, returned in the "html" field of the JSON response.
 
       Additional Rules:
         - always return json in this exact format:
@@ -15,7 +15,7 @@ class ChatController < ApplicationController
           "html": "<the html code here>",
           "follow_up_message": ["your message", "follow up questions to ask the user if any"]
         }
-        - Do not return HTML larger than 75 lines.
+
       PROMPT
 
     response = client.chat(
