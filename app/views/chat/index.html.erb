@@ -16,11 +16,41 @@
       <% end %>
     <% end %>
   </div>
-  <h3>Preview:</h3>
-  <iframe id="preview-frame" srcdoc="<%= @latest_chat&.html_response %>" style="width: 100%; height: 400px; border: 1px solid #ccc; border-radius: 5px; background: white;"></iframe>
+
+  <div id="preview-tabs" style="margin-bottom: 0;">
+    <button id="tab-render" class="preview-tab active" style="padding: 10px 20px; border: 1px solid #ccc; border-bottom: none; background: #fff; cursor: pointer; border-radius: 5px 5px 0 0; margin-right: 5px;">Preview</button>
+    <button id="tab-raw" class="preview-tab" style="padding: 10px 20px; border: 1px solid #ccc; border-bottom: none; background: #eee; cursor: pointer; border-radius: 5px 5px 0 0;">Raw HTML</button>
+  </div>
+
+  <div id="preview-content" style="border: 1px solid #ccc; border-radius: 0 5px 5px 5px;">
+    <iframe id="preview-frame" srcdoc="<%= @latest_chat&.html_response %>" style="width: 100%; height: 400px; border: none; background: white;"></iframe>
+    <div id="raw-html-container" style="display: none; width: 100%; height: 400px; overflow: auto; background: #f5f5f5; box-sizing: border-box;">
+      <table style="border-collapse: collapse; width: 100%; font-family: monospace; font-size: 14px;">
+        <tbody id="raw-html"></tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 <script>
+  function formatWithLineNumbers(html) {
+    if (!html) return '';
+    const lines = html.split('\n');
+    return lines.map((line, index) => {
+      const lineNum = index + 1;
+      const escapedLine = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return `<tr>
+        <td style="padding: 0 12px; text-align: right; color: #999; background: #eee; user-select: none; vertical-align: top; border-right: 1px solid #ddd;">${lineNum}</td>
+        <td style="padding: 0 12px; white-space: pre-wrap; word-wrap: break-word;">${escapedLine || ' '}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // Initialize with existing content if present
+  <% if @latest_chat&.html_response %>
+  document.getElementById("raw-html").innerHTML = formatWithLineNumbers(<%= @latest_chat.html_response.to_json.html_safe %>);
+  <% end %>
+
   document.getElementById("chat-form").addEventListener("ajax:success", function(event) {
     const [data] = event.detail;
     const chat = data.chat;
@@ -32,10 +62,27 @@
     const iframe = document.getElementById("preview-frame");
     iframe.srcdoc = chat.html_response;
 
+    const rawHtml = document.getElementById("raw-html");
+    rawHtml.innerHTML = formatWithLineNumbers(chat.html_response);
+
     document.getElementById("response-area").style.display = "block";
   });
 
   document.getElementById("chat-form").addEventListener("ajax:error", function() {
     alert("Request failed. Please try again.");
+  });
+
+  document.getElementById("tab-render").addEventListener("click", function() {
+    document.getElementById("preview-frame").style.display = "block";
+    document.getElementById("raw-html-container").style.display = "none";
+    this.style.background = "#fff";
+    document.getElementById("tab-raw").style.background = "#eee";
+  });
+
+  document.getElementById("tab-raw").addEventListener("click", function() {
+    document.getElementById("preview-frame").style.display = "none";
+    document.getElementById("raw-html-container").style.display = "block";
+    this.style.background = "#fff";
+    document.getElementById("tab-render").style.background = "#eee";
   });
 </script>
